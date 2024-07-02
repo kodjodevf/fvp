@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/widgets.dart'; //
 import 'package:flutter/services.dart';
+import 'package:fvp/fvp.dart';
 import 'package:path/path.dart' as path;
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 import 'package:video_player_android/video_player_android.dart';
@@ -97,7 +98,6 @@ class MdkVideoPlayer extends mdk.Player {
 }
 
 class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
-  static final _players = <int, MdkVideoPlayer>{};
   static Map<String, Object>? _globalOpts;
   static Map<String, String>? _playerOpts;
   static int? _maxWidth;
@@ -193,7 +193,7 @@ class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
 
   @override
   Future<void> dispose(int textureId) async {
-    _players.remove(textureId)?.dispose();
+    mdkPlayers.remove(textureId)?.dispose();
   }
 
   @override
@@ -271,13 +271,13 @@ class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
         message: 'invalid or unsupported media',
       );
     }
-    _players[tex] = player;
+    mdkPlayers[tex] = player;
     return tex;
   }
 
   @override
   Future<void> setLooping(int textureId, bool looping) async {
-    final player = _players[textureId];
+    final player = mdkPlayers[textureId];
     if (player != null) {
       player.loop = looping ? -1 : 0;
     }
@@ -285,27 +285,27 @@ class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
 
   @override
   Future<void> play(int textureId) async {
-    _players[textureId]?.state = mdk.PlaybackState.playing;
+    mdkPlayers[textureId]?.state = mdk.PlaybackState.playing;
   }
 
   @override
   Future<void> pause(int textureId) async {
-    _players[textureId]?.state = mdk.PlaybackState.paused;
+    mdkPlayers[textureId]?.state = mdk.PlaybackState.paused;
   }
 
   @override
   Future<void> setVolume(int textureId, double volume) async {
-    _players[textureId]?.volume = volume;
+    mdkPlayers[textureId]?.volume = volume;
   }
 
   @override
   Future<void> setPlaybackSpeed(int textureId, double speed) async {
-    _players[textureId]?.playbackRate = speed;
+    mdkPlayers[textureId]?.playbackRate = speed;
   }
 
   @override
   Future<void> seekTo(int textureId, Duration position) async {
-    final player = _players[textureId];
+    final player = mdkPlayers[textureId];
     if (player == null) {
       return;
     }
@@ -325,7 +325,7 @@ class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
 
   @override
   Future<Duration> getPosition(int textureId) async {
-    final player = _players[textureId];
+    final player = mdkPlayers[textureId];
     if (player == null) {
       return Duration.zero;
     }
@@ -344,7 +344,7 @@ class MdkVideoPlayerPlatform extends VideoPlayerPlatform {
 
   @override
   Stream<VideoEvent> videoEventsFor(int textureId) {
-    final player = _players[textureId];
+    final player = mdkPlayers[textureId];
     if (player != null) {
       return player.streamCtl.stream;
     }
